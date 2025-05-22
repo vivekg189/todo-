@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data - Daywise Tasks</title>
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: #e0e7ff;
+      --secondary-color: #8b5cf6;
+      --accent-color: #06b6d4;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --error-color: #ef4444;
+      
+      --background-color: #f8fafc;
+      --background-secondary: #f1f5f9;
+      --text-color: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --border-light: #f1f5f9;
+      
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+      --box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      --gradient-success: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      color: var(--text-color);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .top-right-buttons {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 1000;
+    }
+    
+    .top-right-buttons button {
+      padding: 12px 20px;
+      cursor: pointer;
+      border: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: var(--text-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .top-right-buttons button:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-lg);
+    }
+
+    .top-right-buttons button.active {
+      background: var(--gradient-primary);
+      color: white;
+      border: 1px solid var(--primary-color);
+    }
+    
+    main {
+      margin: 100px auto 60px auto;
+      max-width: 800px;
+      padding: 0 24px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 40px 30px;
+      background: var(--gradient-card);
+      border-radius: 20px;
+      box-shadow: var(--box-shadow-lg);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+      50% { transform: translate(-50%, -50%) rotate(180deg); }
+    }
+
+    .page-header > * {
+      position: relative;
+      z-index: 1;
+    }
+    
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .content-card {
+      background: var(--gradient-card);
+      border-radius: var(--border-radius);
+      padding: 40px;
+      box-shadow: var(--box-shadow-lg);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      transform: translateX(-100%);
+      transition: var(--transition);
+    }
+
+    .content-card:hover::before {
+      transform: translateX(0);
+    }
+    
+    .date-selector {
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    #datePicker {
+      padding: 16px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-family: inherit;
+      background: var(--card-bg);
+      color: var(--text-color);
+      transition: var(--transition);
+      box-shadow: var(--box-shadow);
+    }
+    
+    #datePicker:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .task-summary {
+      background: var(--gradient-success);
+      color: white;
+      padding: 24px;
+      border-radius: var(--border-radius);
+      margin-bottom: 24px;
+      font-weight: 600;
+      box-shadow: var(--box-shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-summary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .completion-ratio {
+      font-size: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      height: 12px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      border-radius: 6px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    #taskList {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    #taskList li {
+      background: var(--card-bg);
+      margin-bottom: 16px;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: var(--transition);
+      box-shadow: var(--box-shadow);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #taskList li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--gradient-primary);
+      transform: scaleY(0);
+      transition: var(--transition);
+    }
+    
+    #taskList li:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-lg);
+    }
+
+    #taskList li:hover::before {
+      transform: scaleY(1);
+    }
+    
+    .task-check {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--card-bg);
+      border: 3px solid var(--border-color);
+      color: transparent;
+      font-size: 16px;
+      font-weight: bold;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    
+    .task-check.completed {
+      background: var(--gradient-success);
+      border-color: var(--success-color);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .task-text {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-color);
+      transition: var(--transition);
+    }
+    
+    .task-text.completed {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    
+    #noTasksMsg {
+      text-align: center;
+      padding: 60px 40px;
+      background: var(--gradient-card);
+      border-radius: var(--border-radius);
+      border: 2px dashed var(--border-color);
+      display: none;
+      position: relative;
+    }
+
+    .no-tasks-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .no-tasks-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .no-tasks-subtext {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    
+    @media (max-width: 768px) {
+      main {
+        margin: 80px 16px 40px;
+        padding: 0;
+      }
+      
+      .page-header {
+        padding: 30px 20px;
+        margin-bottom: 30px;
+      }
+
+      .content-card {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+      
+      .top-right-buttons {
+        top: 16px;
+        right: 16px;
+        gap: 6px;
+      }
+      
+      .top-right-buttons button {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      #taskList li {
+        padding: 16px;
+        gap: 12px;
+      }
+
+      .task-summary {
+        padding: 20px;
+      }
+
+      .completion-ratio {
+        font-size: 18px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background-color: #0f172a;
+        --background-secondary: #1e293b;
+        --card-bg: #1e293b;
+        --text-color: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --border-color: #334155;
+        --border-light: #475569;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      }
+
+      .page-header {
+        background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+      }
+
+      .content-card {
+        background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+      }
+
+      .top-right-buttons button {
+        background: rgba(30, 41, 59, 0.95);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+      }
+
+      .top-right-buttons button:hover {
+        background: var(--card-bg);
+      }
+
+      #datePicker {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+      }
+
+      #taskList li {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+      }
+
+      #noTasksMsg {
+        background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+        border-color: var(--border-color);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-right-buttons">
+    <button onclick="location.href='index.html'">🏠 Home</button>
+    <button onclick="location.href='todo.html'">📋 Tasks</button>
+    <button onclick="location.href='data.html'" class="active">📊 Data</button>
+  </div>
+
+  <main>
+    <div class="page-header">
+      <h1>📊 Task Analytics</h1>
+      <p class="page-subtitle">View and analyze your daily task completion history</p>
+    </div>
+
+    <div class="content-card">
+      <div class="date-selector">
+        <label for="datePicker"><strong>📅 Select Date:</strong></label>
+        <input type="date" id="datePicker" />
+      </div>
+
+      <ul id="taskList"></ul>
+      
+      <div id="noTasksMsg">
+        <div class="no-tasks-icon">📋</div>
+        <div class="no-tasks-text">No tasks found for this date</div>
+        <div class="no-tasks-subtext">Try selecting a different date or create some tasks first</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  const datePicker = document.getElementById('datePicker');
+  const taskList = document.getElementById('taskList');
+  const noTasksMsg = document.getElementById('noTasksMsg');
+
+  // Set default date to today
+  const today = new Date();
+  const formattedDate = today.toISOString().substr(0, 10);
+  datePicker.value = formattedDate;
+  
+  // Load tasks for today on page load
+  loadTasks(formattedDate);
+
+  datePicker.addEventListener('change', () => {
+    const selectedDate = datePicker.value;
+    if (!selectedDate) return;
+    loadTasks(selectedDate);
+  });
+  
+  function loadTasks(date) {
+  taskList.innerHTML = '';
+  noTasksMsg.style.display = 'none';
+
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) {
+    alert("Please log in first.");
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const tasksJSON = localStorage.getItem('tasks_' + currentUser + '_' + date);
+  if (tasksJSON) {
+    const tasks = JSON.parse(tasksJSON);
+    if (tasks.length === 0) {
+      noTasksMsg.style.display = 'block';
+      return;
+    }
+
+    // Count completed tasks
+    let completedCount = 0;
+    tasks.forEach(task => {
+      if (task.completed) completedCount++;
+    });
+
+    // Create and show summary + tasks
+    const completionPercentage = tasks.length > 0 ? 
+      Math.round((completedCount / tasks.length) * 100) : 0;
+
+    const summary = document.createElement('div');
+    summary.className = 'task-summary';
+
+    const ratio = document.createElement('div');
+    ratio.className = 'completion-ratio';
+    ratio.textContent = `${completedCount} of ${tasks.length} tasks completed (${completionPercentage}%)`;
+
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'progress-bar-container';
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'progress-bar';
+    progressBar.style.width = `${completionPercentage}%`;
+
+    progressContainer.appendChild(progressBar);
+    summary.appendChild(ratio);
+    summary.appendChild(progressContainer);
+    taskList.appendChild(summary);
+
+    tasks.forEach(task => {
+      const li = document.createElement('li');
+      const check = document.createElement('span');
+      check.className = task.completed ? 'task-check completed' : 'task-check';
+      check.innerHTML = task.completed ? '✓' : '';
+      const taskText = document.createElement('span');
+      taskText.className = task.completed ? 'task-text completed' : 'task-text';
+      taskText.textContent = task.text;
+
+      li.appendChild(check);
+      li.appendChild(taskText);
+      taskList.appendChild(li);
+    });
+
+  } else {
+    noTasksMsg.style.display = 'block';
+  }
+}
+
+// Add smooth animations when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Add intersection observer for animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe content elements
+  document.querySelectorAll('.content-card').forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(card);
+  });
+});
+
+</script>
+</body>
+</html>
